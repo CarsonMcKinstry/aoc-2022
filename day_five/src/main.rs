@@ -36,20 +36,55 @@ impl Instruction {
     }
 }
 
-fn main() {
-    let state: [Stack; 9] = [
-        Stack::from_str("STHFWR"),
-        Stack::from_str("SGDQW"),
-        Stack::from_str("BTW"),
-        Stack::from_str("DRWTNQZJ"),
-        Stack::from_str("FBHGLVTZ"),
-        Stack::from_str("LPTCVBSG"),
-        Stack::from_str("ZBRTWGP"),
-        Stack::from_str("NGMTCJR"),
-        Stack::from_str("LGBW"),
-    ];
+fn filter_alphabetics(input: &[char]) -> Vec<&char> {
+    input
+        .into_iter()
+        .filter(|c| c.is_alphabetic())
+        .collect()
+}
 
-    let instructions = fs::read_to_string("input.txt").expect("Unable to read input");
+fn parse_input(input: &str) -> (&str, Vec<Stack>) {
+    let input = input.split("\n\n").collect::<Vec<&str>>();
+
+    let raw_stacks = input.iter().next().unwrap();
+    let rest = input.iter().last().unwrap();
+
+    let mut lines = raw_stacks.lines().rev();
+
+    let num_stacks = lines
+        .next()
+        .unwrap()
+        .split_whitespace()
+        .last()
+        .map(|n| n.parse::<usize>().unwrap())
+        .unwrap();
+
+    let mut stacks = vec![Stack::new(); num_stacks];
+
+    for line in lines {
+        let chars = line.chars().collect::<Vec<char>>();
+        let chunks = chars
+            .chunks(4)
+            .map(filter_alphabetics).collect::<Vec<Vec<&char>>>();
+
+        for (stack, chunk) in chunks.iter().enumerate() {
+            
+            match chunk.iter().next() {
+                Some(c) => {
+                    stacks.get_mut(stack).unwrap().push(**c)
+                },
+                None => {}
+            }
+        }
+    }
+
+    (rest, stacks)
+}
+
+fn main() {
+    let input = fs::read_to_string("input.txt").expect("Unable to read input");
+
+    let (instructions, state) = parse_input(input.as_str());
 
     let instructions = instructions
         .lines()
@@ -99,4 +134,36 @@ fn main() {
         .collect::<String>();
 
     println!("{:?}", tops);
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    const SAMPLE_INPUT: &str = "[D]        
+[N] [C]    
+[Z] [M] [P]
+ 1   2   3
+
+move 1 from 3 to 2";
+
+
+
+    #[test]
+    fn do_a_thing() {
+        let (_, out) = parse_input(SAMPLE_INPUT);
+
+        let expected = vec!(
+            Stack::from_str("ZND"),
+            Stack::from_str("MC"),
+            Stack::from_str("P")
+        );
+
+        assert_eq!(out, expected);
+
+        let first = out.first().unwrap();
+
+        assert_eq!(first.peek(), Some(&'D'));
+    }
 }
