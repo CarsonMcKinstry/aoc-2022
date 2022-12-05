@@ -24,20 +24,15 @@ struct Instruction {
 
 impl Instruction {
     pub(crate) fn from_str(input: &str) -> Self {
-        let [m, src, dest]: [usize; 3] = input
+        let mut inst = input
             .split_whitespace()
-            .filter_map(|inst| inst.parse::<usize>().ok())
-            .take(3)
-            .into_iter()
-            .collect::<Vec<usize>>()
-            .try_into()
-            .unwrap();
+            .filter_map(|inst| inst.parse::<usize>().ok());
 
-        Self {
-            m,
-            src: src - 1,
-            dest: dest - 1,
-        }
+        let m = inst.next().unwrap();
+        let src = inst.next().map(|inst| inst - 1).unwrap();
+        let dest = inst.next().map(|inst| inst - 1).unwrap();
+
+        Self { m, src, dest }
     }
 }
 
@@ -56,7 +51,10 @@ fn main() {
 
     let instructions = fs::read_to_string("input.txt").expect("Unable to read input");
 
-    let instructions = instructions.lines().map(Instruction::from_str).collect::<Vec<Instruction>>();
+    let instructions = instructions
+        .lines()
+        .map(Instruction::from_str)
+        .collect::<Vec<Instruction>>();
 
     let mut part_one_state = state.clone();
 
@@ -82,7 +80,7 @@ fn main() {
     for instruction in &instructions {
         let Instruction { m, src, dest } = instruction;
 
-        let mut temp =  Stack::new();
+        let mut temp = Stack::new();
 
         for _ in 0..*m {
             let value = part_two_state.get_mut(*src).unwrap().pop().unwrap();
