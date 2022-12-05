@@ -25,17 +25,11 @@ impl Instruction {
 }
 
 fn filter_alphabetics(input: &[char]) -> Vec<&char> {
-    input
-        .into_iter()
-        .filter(|c| c.is_alphabetic())
-        .collect()
+    input.into_iter().filter(|c| c.is_alphabetic()).collect()
 }
 
-fn parse_input(input: &str) -> (&str, Vec<Stack>) {
-    let input = input.split("\n\n").collect::<Vec<&str>>();
-
-    let raw_stacks = input.iter().next().unwrap();
-    let rest = input.iter().last().unwrap();
+fn parse_raw_stacks(raw_stacks: &str) -> Vec<Stack> {
+    // let input = input.split("\n\n").collect::<Vec<&str>>();
 
     let mut lines = raw_stacks.lines().rev();
 
@@ -53,26 +47,28 @@ fn parse_input(input: &str) -> (&str, Vec<Stack>) {
         let chars = line.chars().collect::<Vec<char>>();
         let chunks = chars
             .chunks(4)
-            .map(filter_alphabetics).collect::<Vec<Vec<&char>>>();
+            .map(filter_alphabetics)
+            .collect::<Vec<Vec<&char>>>();
 
         for (stack, chunk) in chunks.iter().enumerate() {
-            
             match chunk.iter().next() {
-                Some(c) => {
-                    stacks.get_mut(stack).unwrap().push(**c)
-                },
+                Some(c) => stacks.get_mut(stack).unwrap().push(**c),
                 None => {}
             }
         }
     }
 
-    (rest, stacks)
+    stacks
 }
 
 fn main() {
     let input = fs::read_to_string("input.txt").expect("Unable to read input");
+    let input = input.split("\n\n").collect::<Vec<&str>>();
 
-    let (instructions, state) = parse_input(input.as_str());
+    let raw_stacks = input.first().unwrap();
+    let instructions = input.last().unwrap();
+
+    let state = parse_raw_stacks(raw_stacks);
 
     let instructions = instructions
         .lines()
@@ -132,21 +128,17 @@ mod tests {
     const SAMPLE_INPUT: &str = "[D]        
 [N] [C]    
 [Z] [M] [P]
- 1   2   3
-
-move 1 from 3 to 2";
-
-
+ 1   2   3";
 
     #[test]
     fn do_a_thing() {
-        let (_, out) = parse_input(SAMPLE_INPUT);
+        let out = parse_raw_stacks(SAMPLE_INPUT);
 
-        let expected = vec!(
+        let expected = vec![
             Stack::from_str("ZND"),
             Stack::from_str("MC"),
-            Stack::from_str("P")
-        );
+            Stack::from_str("P"),
+        ];
 
         assert_eq!(out, expected);
 
