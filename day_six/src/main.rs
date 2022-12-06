@@ -5,11 +5,7 @@ pub(crate) fn end_index_of_first_marker(s: &str, n: usize) -> Option<usize> {
         .collect::<Vec<char>>()
         .windows(n)
         .enumerate()
-        .find(|(_, chars)| {
-            let chars = chars.into_iter();
-            let set: HashSet<&char> = HashSet::from_iter(chars);
-            set.len() == n
-        })
+        .find(|(_, chars)| HashSet::<_>::from_iter(chars.into_iter()).len() == n)
         .map(|(i, _)| i + n)
 }
 
