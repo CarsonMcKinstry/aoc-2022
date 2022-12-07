@@ -164,9 +164,9 @@ fn main() {
 
     let space_left_to_free = REQUIRED_SIZE - free_space;
 
-    println!("File System Size:         {}", file_system_size);
-    println!("Free Space:               {}", free_space);
-    println!("Space Left To Free:       {}", space_left_to_free);
+    // println!("File System Size:         {}", file_system_size);
+    // println!("Free Space:               {}", free_space);
+    // println!("Space Left To Free:       {}", space_left_to_free);
 
     let part_one: i32 = sizes.iter().filter(|size| size <= &&100_000).sum();
 
