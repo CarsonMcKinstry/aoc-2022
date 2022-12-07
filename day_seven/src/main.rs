@@ -1,6 +1,7 @@
 use std::cell::RefCell;
 use std::fs;
 use std::rc::Rc;
+use std::time::Instant;
 
 const FILE_SYSTEM_MAX: i32 = 70000000;
 const REQUIRED_SIZE: i32 = 30000000;
@@ -153,8 +154,13 @@ impl FileSystem {
 
 fn main() {
     let input = fs::read_to_string("input.txt").expect("Unable to open input");
-
+    let start = Instant::now();
+    
     let file_system = FileSystem::recreate_crom_terminal(input.as_str());
+
+    let duration = start.elapsed();
+
+    println!("Time elapsed to recreate file system: {:?}", duration);
 
     let sizes = file_system.calculate_dir_sizes();
 
