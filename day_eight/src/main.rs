@@ -32,18 +32,7 @@ pub(crate) fn find_neighbors(
     [top, right, bottom, left]
 }
 
-pub(crate) fn count_visible_trees(input: &str) -> Vec<usize> {
-    let forest = input
-        .lines()
-        .map(|l| l.trim())
-        .into_iter()
-        .collect::<String>()
-        .chars()
-        .filter_map(|c| c.to_string().parse::<usize>().ok())
-        .collect::<Vec<usize>>();
-
-    let width = input.lines().next().unwrap().len();
-    let height = input.lines().count();
+pub(crate) fn count_visible_trees(forest: &Vec<usize>, width: usize, height: usize) -> Vec<usize> {
 
     forest
         .iter()
@@ -106,18 +95,7 @@ pub(crate) fn get_scenic_score(tree: usize, neighbors: [Vec<usize>; 4]) -> usize
     top_view * right_view * bottom_view * left_view
 }
 
-pub(crate) fn find_best_scenic_score(input: &str) -> usize {
-    let forest = input
-        .lines()
-        .map(|l| l.trim())
-        .into_iter()
-        .collect::<String>()
-        .chars()
-        .filter_map(|c| c.to_string().parse::<usize>().ok())
-        .collect::<Vec<usize>>();
-
-    let width = input.lines().next().unwrap().len();
-    let height = input.lines().count();
+pub(crate) fn find_best_scenic_score(forest: &Vec<usize>, width: usize, height: usize) -> usize {
 
     let scenic_scores = forest.iter().enumerate().map(|(i, tree)| {
         let (x, y) = index_to_coords(i, width);
@@ -146,14 +124,26 @@ pub(crate) fn find_best_scenic_score(input: &str) -> usize {
 fn main() {
     let input = fs::read_to_string("input.txt").expect("Unable to read input");
 
+    let forest = input
+        .lines()
+        .map(|l| l.trim())
+        .into_iter()
+        .collect::<String>()
+        .chars()
+        .map(|c| c.to_string().parse::<usize>().unwrap())
+        .collect::<Vec<usize>>();
+
+    let width = input.lines().next().unwrap().len();
+    let height = input.lines().count();
+
     let start = Instant::now();
-    let visible_trees = count_visible_trees(input.as_str());
+    let visible_trees = count_visible_trees(&forest, width, height);
     let duration = start.elapsed();
     println!("Part 1 took: {:?}", duration);
     println!("{}", visible_trees.len());
 
     let start = Instant::now();
-    let best_scenic_score = find_best_scenic_score(input.as_str());
+    let best_scenic_score = find_best_scenic_score(&forest, width, height);
     let duration = start.elapsed();
     println!("Part 2 took: {:?}", duration);
     println!("{}", best_scenic_score);
@@ -205,28 +195,21 @@ mod tests {
         assert_eq!(output, [vec![1], vec![7, 8, 9], vec![11, 16, 21], vec![5]])
     }
 
+    const FOREST: [usize; 25] = [3,0,3,7,3,2,5,5,1,2,6,5,3,3,2,3,3,5,4,9,3,5,3,9,0];
+
     #[test]
     fn small_forest() {
-        let input = "30373
-25512
-65332
-33549
-35390";
-
-        let visible_trees = count_visible_trees(input);
+        let forest: Vec<usize> = FOREST.iter().map(|u| *u).collect();
+        let visible_trees = count_visible_trees(&forest, 5, 5);
 
         assert_eq!(visible_trees.len(), 21)
     }
 
     #[test]
     fn small_forest_best_scenic_score() {
-        let input = "30373
-25512
-65332
-33549
-35390";
+        let forest: Vec<usize> = FOREST.iter().map(|u| *u).collect();
 
-        assert_eq!(find_best_scenic_score(input), 8);
+        assert_eq!(find_best_scenic_score(&forest, 5, 5), 8);
     }
 
     #[test]
